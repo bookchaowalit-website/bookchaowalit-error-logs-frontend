@@ -69,6 +69,55 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+  {/* Structured Data for SEO */}
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Error Logs',
+        url: 'https://bookchaowalit-error-logs.vercel.app',
+        description: 'Error Logs by Bookchaowalit - A modern web application',
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'Web',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD'
+        },
+        author: {
+          '@type': 'Person',
+          name: 'Bookchaowalit',
+          url: 'https://bookchaowalit.com'
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Bookchaowalit',
+          url: 'https://bookchaowalit.com'
+        }
+      })
+    }}
+  />
+
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Error Logs',
+        url: 'https://bookchaowalit-error-logs.vercel.app',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://bookchaowalit-error-logs.vercel.app/more-projects',
+          'query-input': 'required name=search_term'
+        }
+      })
+    }}
+  />
+
+
         {children}
       </body>
     </html>
