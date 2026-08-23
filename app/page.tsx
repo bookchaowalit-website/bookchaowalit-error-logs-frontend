@@ -1,155 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
 
-function Shell({
-  title,
-  subtitle,
-  badge = "Portfolio demo · local-only",
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  badge?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-100">
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-8">
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{badge}</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">{title}</h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">{subtitle}</p>
-        </header>
-        {children}
-        <footer className="mt-10 border-t border-zinc-200 pt-4 text-xs text-zinc-500 dark:border-zinc-800">
-          Honest demo: no multi-tenant backend. State (if any) stays in this browser.
-        </footer>
-      </div>
-    </div>
-  );
-}
-
-function Button({
-  children,
-  onClick,
-  variant = "primary",
-  disabled,
-  type = "button",
-  className = "",
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-  variant?: "primary" | "secondary" | "ghost" | "danger";
-  disabled?: boolean;
-  type?: "button" | "submit";
-  className?: string;
-}) {
-  const base =
-    "inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition disabled:opacity-50 " +
-    className;
-  const styles =
-    variant === "primary"
-      ? "bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"
-      : variant === "secondary"
-        ? "bg-white text-zinc-900 ring-1 ring-zinc-200 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-700"
-        : variant === "danger"
-          ? "bg-red-600 text-white hover:bg-red-500"
-          : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900";
-  return (
-    <button type={type} disabled={disabled} onClick={onClick} className={`${base} ${styles}`}>
-      {children}
-    </button>
-  );
-}
-
-const inputClass =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-950";
-
-function useLocalStorage<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(initial);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw != null) setValue(JSON.parse(raw) as T);
-    } catch {
-      /* ignore */
-    }
-    setReady(true);
-  }, [key]);
-  useEffect(() => {
-    if (!ready) return;
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value, ready]);
-  return [value, setValue] as const;
-}
-
-function uid() {
-  return crypto.randomUUID();
-}
-
-async function copyText(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-
-const CARDS = [{"label": "Errors (1h)", "value": "3", "hint": "sample"}, {"label": "Warn", "value": "12", "hint": "sample"}, {"label": "Users affected", "value": "2", "hint": "sample"}, {"label": "MTTR", "value": "14m", "hint": "sample"}];
-const ROWS = [{"name": "TypeError: x", "value": "8", "status": "warn"}, {"name": "API 500", "value": "1", "status": "down"}];
+type LogRow = { id: string; time: string; name: string; value: string; status: "warn" | "down" | "ok"; service: string; detail: string };
+const LOGS: LogRow[] = [
+  { id: "type-error", time: "14:03:22", name: "TypeError: x", value: "8", status: "warn", service: "checkout-ui", detail: "Cannot read properties of undefined (reading 'call')" },
+  { id: "api-500", time: "13:58:09", name: "API 500", value: "1", status: "down", service: "tip-jar-api", detail: "POST /record returned 500 in the sample trace" },
+  { id: "hydration", time: "12:44:16", name: "Hydration mismatch", value: "4", status: "warn", service: "portfolio-shell", detail: "Server and client markup differ in the sample payload" },
+  { id: "asset", time: "11:31:47", name: "Missing asset", value: "2", status: "ok", service: "artblog", detail: "Fallback artwork served; no user-facing break" },
+];
+const RANGES = ["24h", "7d", "30d"];
 
 export default function Home() {
   const [range, setRange] = useState("7d");
-  return (
-    <Shell title="Error Logs" subtitle="Client error samples for a status board." badge="Demo metrics · sample data">
-      <div className="mb-4 flex gap-2">
-        {["24h", "7d", "30d"].map((r) => (
-          <Button key={r} variant={range === r ? "primary" : "secondary"} onClick={() => setRange(r)}>
-            {r}
-          </Button>
-        ))}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {CARDS.map((c: { label: string; value: string; hint: string }) => (
-          <div key={c.label} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-            <div className="text-xs text-zinc-500">{c.label}</div>
-            <div className="mt-1 text-2xl font-semibold tabular-nums">{c.value}</div>
-            <div className="mt-1 text-xs text-zinc-500">{c.hint} · {range}</div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <table className="min-w-full text-sm">
-          <thead className="bg-zinc-100 dark:bg-zinc-900">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium">Name</th>
-              <th className="px-3 py-2 text-left font-medium">Value</th>
-              <th className="px-3 py-2 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ROWS.map((r: { name: string; value: string; status: string }) => (
-              <tr key={r.name} className="border-t border-zinc-100 dark:border-zinc-900">
-                <td className="px-3 py-2">{r.name}</td>
-                <td className="px-3 py-2 font-mono tabular-nums">{r.value}</td>
-                <td className="px-3 py-2">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${
-                    r.status === "ok" || r.status === "up"
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                      : r.status === "warn"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-red-100 text-red-800"
-                  }`}>{r.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Shell>
-  );
+  const [selected, setSelected] = useState(LOGS[0]);
+  const visible = useMemo(() => range === "24h" ? LOGS.slice(0, 3) : LOGS, [range]);
+  return <main className="el-page">
+    <header className="el-topbar"><Link className="el-mark" href="/">ERR / ROOM</Link><span>SAMPLE SIGNALS / NO INGESTION</span><span className="el-mode"><i /> READ-ONLY</span></header>
+    <section className="el-hero"><div className="el-hero-copy"><p className="el-stamp">INCIDENT ROOM / SAMPLE DATA</p><h1>Errors leave<br /><span>a trail.</span></h1><p className="el-intro">A compact surface for reading client error samples. Follow a row from signal to context without pretending this demo is connected to a production stream.</p><div className="el-legend"><span><i className="el-dot el-dot-red" /> incident</span><span><i className="el-dot el-dot-amber" /> needs attention</span><span><i className="el-dot el-dot-green" /> contained</span></div></div><aside className="el-incident"><div className="el-incident-head"><span>ACTIVE SAMPLE</span><b>{selected.status.toUpperCase()}</b></div><div className="el-incident-body"><strong>{selected.name}</strong><p>{selected.detail}</p><div><span>{selected.service}</span><span>{selected.time} UTC</span></div></div></aside></section>
+    <section className="el-board" aria-labelledby="board-title"><div className="el-board-head"><div><span className="el-board-code">01 / SIGNAL BOARD</span><h2 id="board-title">Read the room.</h2></div><div className="el-range" role="group" aria-label="Sample time range">{RANGES.map((item) => <button type="button" key={item} className={range === item ? "is-active" : ""} onClick={() => setRange(item)}>{item}</button>)}</div></div><div className="el-summary-line"><span>{visible.length} named signals in sample window</span><strong>Window / {range}</strong></div><div className="el-log-table"><div className="el-log-table-head"><span>TIME</span><span>SIGNAL</span><span>SERVICE</span><span>COUNT</span><span>STATE</span></div>{visible.map((log) => <button type="button" className={`el-log-row ${selected.id === log.id ? "is-selected" : ""}`} key={log.id} onClick={() => setSelected(log)}><span>{log.time}</span><strong>{log.name}</strong><span>{log.service}</span><b>{log.value}</b><span className={`el-state el-state-${log.status}`}>{log.status}</span></button>)}</div></section>
+    <section className="el-footnote"><span>02 / HONEST LIMIT</span><p>Sample data only. The interface demonstrates triage states, range selection, and a readable incident trail; it does not receive or store real application errors.</p></section>
+    <footer className="el-footer"><strong>NO LIVE PIPELINE ATTACHED.</strong><span>Error Logs · Bookchaowalit · sample board</span></footer>
+  </main>;
 }

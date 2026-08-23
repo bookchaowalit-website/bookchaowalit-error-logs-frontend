@@ -1,36 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chakra_Petch, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const display = Chakra_Petch({ weight: ["400", "600", "700"], variable: "--font-display", subsets: ["latin"] });
+const mono = Roboto_Mono({ weight: ["400", "500"], variable: "--font-mono", subsets: ["latin"] });
+export const metadata: Metadata = { title: "Error Room — sample signal board", description: "Read client error samples in a local status board.", metadataBase: new URL("https://error-logs.bookchaowalit.com") };
 
-export const metadata: Metadata = {
-  title: "Error Logs | Bookchaowalit",
-  description: "Client error samples for a status board.",
-  keywords: ["error-logs", "metrics"],
-  authors: [{ name: "Bookchaowalit", url: "https://bookchaowalit.com" }],
-  creator: "Bookchaowalit",
-  metadataBase: new URL("https://bookchaowalit.com"),
-  openGraph: {
-    type: "website",
-    title: "Error Logs | Bookchaowalit",
-    description: "Client error samples for a status board.",
-    siteName: "Bookchaowalit",
-  },
-  robots: { index: true, follow: true },
-};
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Analytics />
-        <SpeedInsights />
-        {children}
-      </body>
-    </html>
-  );
-}
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={`${display.variable} ${mono.variable}`}>
+  {/* THESIS: Error samples deserve a readable incident room, not decorative KPI cards. OWN-WORLD: navy signal-room surfaces, amber/red/green state lamps, hard tabular rows, and an angular technical display face. STORY: visitors select a time window, choose a signal, and follow its service/detail trail while seeing the sample boundary. FIRST VIEWPORT: the selected incident is visible beside the thesis; the signal board is the first task surface and range controls sit on its header. FORM: incident signal room / candidate 3 / seed ea918651. FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance */}
+  <Analytics /><SpeedInsights />{children}
+</body></html>; }
